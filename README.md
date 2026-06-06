@@ -1,4 +1,4 @@
-# 🔍 法學論文題目尋找助教｜Legal Thesis Topic Finder
+# 🔍 法學論文題目助教｜Legal Thesis Topic Finder
 
 ![Profile views](https://komarev.com/ghpvc/?username=mjib007&label=Profile%20views&color=4c8eda&style=flat)
 [![Stars](https://img.shields.io/github/stars/mjib007/legal-thesis-topic?style=flat&color=yellow)](https://github.com/mjib007/legal-thesis-topic/stargazers)
