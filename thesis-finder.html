@@ -221,40 +221,7 @@ header {
 .msg-content li { margin-bottom: 4px; }
 .msg-content hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 
-/* Progress table in messages */
-.progress-table {
-  margin-top: 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  font-size: 12px;
-}
-.progress-table table { width: 100%; border-collapse: collapse; }
-.progress-table th {
-  background: var(--surface2);
-  padding: 7px 12px;
-  text-align: left;
-  font-weight: 500;
-  color: var(--text-muted);
-  font-size: 11px;
-  letter-spacing: 0.05em;
-}
-.progress-table td {
-  padding: 7px 12px;
-  border-top: 1px solid var(--border);
-  color: var(--text-muted);
-}
-.progress-table tr.row-done td { color: var(--text); }
-.progress-table tr.row-active td { color: var(--accent); font-weight: 500; }
-.badge {
-  display: inline-block;
-  padding: 1px 7px;
-  border-radius: 10px;
-  font-size: 10px;
-}
-.badge-done { background: #1e3a28; color: #6dbf85; }
-.badge-active { background: #3a2e10; color: var(--accent); }
-.badge-pending { background: var(--surface2); color: var(--text-dim); }
+
 
 /* ── Input area ── */
 .input-area {
@@ -569,21 +536,8 @@ const SYSTEM_PROMPT = `你是一位法學論文題目引導助教，專門協助
 
 1. **逐步引導**：一次只問一個問題，等學生回答後再進入下一步。
 2. **可跳步**：學生如果說「我要跳到Step X」或「我的題目已確定，從Step 5開始」，應配合調整，從指定步驟繼續。
-3. **每次回覆結尾必須附上進度表**，格式如下（用markdown表格）：
-
----
-**📊 目前進度**
-
-| 步驟 | 內容 | 狀態 |
-|------|------|------|
-| Step 1 | 找起點 | ✅ 完成 |
-| **Step 2** | **說出初步方向** | **🔄 進行中** |
-| Step 3 | 是介紹還是研究？ | ⬜ 待進行 |
-| Step 4 | 盤點法令狀態 | ⬜ 待進行 |
-| Step 5 | 國內研究現況 | ⬜ 待進行 |
-| Step 6 | 找關鍵字 | ⬜ 待進行 |
-| Step 7 | 外文文獻分類 | ⬜ 待進行 |
-| Step 8 | 確認差異化題目 | ⬜ 待進行 |
+3. **每次回覆結尾加上一行隱藏步驟標記**，格式固定為：
+`[STEP:數字]`，例如目前在Step 1就寫 `[STEP:1]`，在Step 3就寫 `[STEP:3]`。這行只用於系統判斷，不需要解釋給學生看。
 
 4. **如果學生貼上一批文獻標題和摘要**，直接進行Step 7的主題分類，格式參考：
 類別A（AI治理）：1, 7, 12, 55
@@ -772,19 +726,15 @@ async function callGemini(key, history) {
 }
 
 function detectStep(text) {
-  // 只從進度表「進行中」那一行抓當前步驟，避免誤判
-  const lines = text.split('\n');
-  for (const line of lines) {
-    if (line.includes('🔄') || line.includes('進行中')) {
-      const m = line.match(/Step\s*(\d)/);
-      if (m) { updateStepStatus(parseInt(m[1])); return; }
+  const m = text.match(/\[STEP:(\d)\]/);
+  if (m) {
+    const n = parseInt(m[1]);
+    if (n === 8 && text.includes('差異化題目')) {
+      STEPS.forEach(s => stepStatus[s.id] = 'done');
+      renderSteps();
+    } else {
+      updateStepStatus(n);
     }
-  }
-  // 全部完成：Step 8 也是 ✅
-  const allDone = lines.filter(l => l.includes('Step') && l.match(/Step\s*[1-8]/));
-  if (allDone.length >= 8 && !text.includes('⬜') && !text.includes('🔄')) {
-    STEPS.forEach(s => stepStatus[s.id] = 'done');
-    renderSteps();
   }
 }
 
@@ -810,25 +760,6 @@ function addLoading() {
 }
 
 function renderMarkdown(text) {
-  // Tables
-  text = text.replace(/\|(.+)\|/g, (match) => {
-    if (match.includes('---')) return '';
-    const cells = match.split('|').filter(c => c.trim());
-    return '<tr>' + cells.map(c => {
-      const t = c.trim();
-      return `<td>${t}</td>`;
-    }).join('') + '</tr>';
-  });
-  // Wrap table rows
-  text = text.replace(/((<tr>.*<\/tr>\n?)+)/g, (m) => {
-    const rows = m.trim().split('\n').filter(r => r.includes('<tr>'));
-    const header = rows[0].replace(/<td>/g,'<th>').replace(/<\/td>/g,'</th>');
-    const body = rows.slice(1).map((r, i) => {
-      const cls = r.includes('🔄') ? 'row-active' : r.includes('✅') ? 'row-done' : '';
-      return r.replace('<tr>', `<tr class="${cls}">`);
-    }).join('\n');
-    return `<div class="progress-table"><table><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
-  });
   // Bold
   text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   // Italic
@@ -841,6 +772,8 @@ function renderMarkdown(text) {
   // Lists
   text = text.replace(/^[-•] (.+)$/gm, '<li>$1</li>');
   text = text.replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`);
+  // 移除隱藏步驟標記
+  text = text.replace(/\[STEP:\d\]/g, '');
   // Paragraphs
   text = text.split(/\n\n+/).map(p => {
     p = p.trim();
