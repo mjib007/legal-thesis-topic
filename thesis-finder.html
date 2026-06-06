@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>法學論文題目助教</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #242424;
+  --border: #2e2e2e;
+  --text: #e8e4dc;
+  --text-muted: #7a7570;
+  --text-dim: #4a4845;
+  --accent: #c8a96e;
+  --accent-dim: #6e5a35;
+  --step-done: #4a7c59;
+  --step-active: #c8a96e;
+  --step-pending: #2e2e2e;
+  --danger: #8b3a3a;
+  --radius: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+header {
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.logo {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.key-status {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.key-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--step-done);
+}
+.key-dot.none { background: var(--danger); }
+.btn-sm {
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Main layout ── */
+.main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  height: calc(100vh - 61px);
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  padding: 24px 0;
+  overflow-y: auto;
+}
+.sidebar-title {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  padding: 0 20px 12px;
+  text-transform: uppercase;
+}
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-left: 2px solid transparent;
+}
+.step-item:hover { background: var(--surface); }
+.step-item.active {
+  border-left-color: var(--accent);
+  background: var(--surface);
+}
+.step-item.done { border-left-color: var(--step-done); }
+.step-num {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  background: var(--step-pending);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+}
+.step-item.active .step-num {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-color: var(--accent-dim);
+}
+.step-item.done .step-num {
+  background: var(--step-done);
+  color: #fff;
+  border-color: var(--step-done);
+  font-size: 10px;
+}
+.step-label {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.step-item.active .step-label { color: var(--text); }
+.step-item.done .step-label { color: var(--text-muted); }
+.sidebar-divider {
+  margin: 16px 20px;
+  border: none;
+  border-top: 1px solid var(--border);
+}
+.reset-btn {
+  margin: 0 20px;
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+.reset-btn:hover { color: var(--danger); }
+
+/* ── Chat area ── */
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.messages::-webkit-scrollbar { width: 4px; }
+.messages::-webkit-scrollbar-track { background: transparent; }
+.messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.msg {
+  display: flex;
+  gap: 14px;
+  max-width: 760px;
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.msg.user { flex-direction: row-reverse; align-self: flex-end; }
+.msg-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  margin-top: 2px;
+}
+.msg.assistant .msg-avatar { background: var(--accent-dim); color: var(--accent); }
+.msg.user .msg-avatar { background: var(--surface2); color: var(--text-muted); }
+.msg-body { flex: 1; }
+.msg-content {
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--text);
+}
+.msg.user .msg-content {
+  background: var(--surface2);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 14px;
+}
+.msg-content p { margin-bottom: 10px; }
+.msg-content p:last-child { margin-bottom: 0; }
+.msg-content strong { color: var(--accent); font-weight: 500; }
+.msg-content ul, .msg-content ol { padding-left: 20px; margin-bottom: 10px; }
+.msg-content li { margin-bottom: 4px; }
+.msg-content hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+/* Progress table in messages */
+.progress-table {
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  font-size: 12px;
+}
+.progress-table table { width: 100%; border-collapse: collapse; }
+.progress-table th {
+  background: var(--surface2);
+  padding: 7px 12px;
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+.progress-table td {
+  padding: 7px 12px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.progress-table tr.row-done td { color: var(--text); }
+.progress-table tr.row-active td { color: var(--accent); font-weight: 500; }
+.badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 10px;
+}
+.badge-done { background: #1e3a28; color: #6dbf85; }
+.badge-active { background: #3a2e10; color: var(--accent); }
+.badge-pending { background: var(--surface2); color: var(--text-dim); }
+
+/* ── Input area ── */
+.input-area {
+  padding: 16px 32px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+.input-wrap {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 14px;
+  transition: border-color 0.15s;
+}
+.input-wrap:focus-within { border-color: var(--accent-dim); }
+textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1.6;
+  max-height: 140px;
+  min-height: 24px;
+}
+textarea::placeholder { color: var(--text-dim); }
+.send-btn {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  background: var(--accent-dim);
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.send-btn:hover { background: var(--accent); }
+.send-btn:disabled { background: var(--surface2); cursor: not-allowed; }
+.send-btn svg { width: 14px; height: 14px; fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.send-btn:hover svg { stroke: #0f0f0f; }
+.send-btn:disabled svg { stroke: var(--text-dim); }
+
+/* ── API Key modal ── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+.overlay.hidden { display: none; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  width: 420px;
+  max-width: 90vw;
+}
+.modal-title {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.modal-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.modal-desc a { color: var(--accent); text-decoration: none; }
+.modal-desc a:hover { text-decoration: underline; }
+.field-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+.field-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: 'Noto Sans TC', monospace;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+  margin-bottom: 20px;
+}
+.field-input:focus { border-color: var(--accent-dim); }
+.modal-err { font-size: 12px; color: #e07070; margin-bottom: 12px; display: none; }
+.btn-primary {
+  width: 100%;
+  padding: 11px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid var(--accent-dim);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-weight: 500;
+}
+.btn-primary:hover { background: var(--accent); color: #0f0f0f; }
+
+/* ── Welcome screen ── */
+.welcome {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  gap: 16px;
+}
+.welcome-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: var(--accent-dim);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.welcome h2 {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.welcome p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.8;
+  max-width: 400px;
+}
+.quick-starts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 400px;
+}
+.quick-btn {
+  padding: 10px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+}
+.quick-btn:hover { border-color: var(--accent-dim); color: var(--text); }
+
+/* ── Loading ── */
+.loading-dots {
+  display: inline-flex; gap: 4px; align-items: center;
+  padding: 4px 0;
+}
+.loading-dots span {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  animation: dot 1.2s infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dot { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
+</style>
+</head>
+<body>
+
+<!-- API Key Modal -->
+<div class="overlay" id="keyOverlay">
+  <div class="modal">
+    <div class="modal-title">設定 Gemini API 金鑰</div>
+    <div class="modal-desc">
+      請前往 <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a> 取得免費 API 金鑰，貼入下方後即可開始使用。金鑰僅存在你的瀏覽器中，不會上傳至任何伺服器。
+    </div>
+    <div class="field-label">Gemini API Key</div>
+    <input type="password" class="field-input" id="keyInput" placeholder="AIza...">
+    <div class="modal-err" id="keyErr">金鑰格式不正確，請重新確認</div>
+    <button class="btn-primary" onclick="saveKey()">確認並開始使用</button>
+  </div>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="logo">⚖ 法學論文題目助教</div>
+  <div class="header-right">
+    <div class="key-status" id="keyStatus">
+      <div class="key-dot none" id="keyDot"></div>
+      <span id="keyLabel">未設定金鑰</span>
+    </div>
+    <button class="btn-sm" onclick="showKeyModal()">更換金鑰</button>
+  </div>
+</header>
+
+<div class="main">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">流程進度</div>
+    <div id="stepList"></div>
+    <hr class="sidebar-divider">
+    <button class="reset-btn" onclick="resetChat()">重新開始對話</button>
+  </aside>
+
+  <!-- Chat -->
+  <div class="chat-area">
+    <div class="messages" id="messages">
+      <!-- Welcome screen -->
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">📚</div>
+        <h2>找到適合你的論文題目</h2>
+        <p>我會一步一步引導你從興趣出發，找到有學術價值、又有差異化的法學論文題目。</p>
+        <div class="quick-starts">
+          <button class="quick-btn" onclick="quickStart('我完全沒有方向，想從頭開始找題目')">我完全沒有方向，想從頭開始</button>
+          <button class="quick-btn" onclick="quickStart('我已經有一個初步方向，想確認能不能寫成論文')">我已經有初步方向，想確認可寫性</button>
+          <button class="quick-btn" onclick="quickStart('我的題目已經確定，想從文獻搜尋開始（Step 5）')">題目已確定，從文獻搜尋開始</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea id="userInput" placeholder="輸入你的想法…（Enter 送出，Shift+Enter 換行）" rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
+          <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STEPS = [
+  { id: 1, label: '找起點', short: '工作/課堂/時事' },
+  { id: 2, label: '說出初步方向', short: '一句話描述主題' },
+  { id: 3, label: '介紹還是研究？', short: '判斷可寫性' },
+  { id: 4, label: '盤點法令狀態', short: '草案/修正/未立法' },
+  { id: 5, label: '國內研究現況', short: '期刊/博碩士論文' },
+  { id: 6, label: '找關鍵字', short: '中翻英/問AI' },
+  { id: 7, label: '外文文獻分類', short: 'Westlaw→AI分類' },
+  { id: 8, label: '確認差異化題目', short: '興趣/價值/趨勢' },
+];
+
+const SYSTEM_PROMPT = `你是一位法學論文題目引導助教，專門協助法律系碩士生找到適合自己的論文題目。
+
+## 你的引導流程（共8步）
+
+**Step 1｜找起點**
+引導學生從以下來源找靈感：工作經驗、課堂學習覺得有問題、社會新聞時事、目前修法爭議、資料庫新議題。
+
+**Step 2｜說出初步方向**
+請學生用一句話說出主題。例如：「台商在越南的勞動法令問題」、「人頭帳戶的法律爭議」、「數位資產的法律問題」、「自動駕駛法制」等。
+
+**Step 3｜是介紹還是研究？**
+判斷學生說的是「介紹型主題」還是「研究問題」。
+- 判斷標準：這個主題有沒有學生認為「不對」或「不夠」的地方？
+- 示範：「台商越南勞動法令」偏向介紹，缺乏學術爭議，應引導重找切入點。「人頭帳戶法律爭議」有爭議但可進一步強化：改成「如何建立司法制度以遏止人頭帳戶」就更有研究意義。
+- 若判斷為介紹型，引導回Step 1重找切入點。
+
+**Step 4｜盤點相關法令狀態**
+協助學生確認相關法令目前處於哪個狀態，找出切入點：
+- 修正草案中 → 草案爭議點是什麼？現行法哪裡不足？
+- 剛修正完畢 → 修正方向對不對？有沒有遺漏問題？
+- 修正一段時間 → 實施效果如何？有沒有達到立法目的？
+- 長期未修正 → 現行法有沒有跟不上實務的缺口？
+- 尚未有法令 → 為什麼需要立法？現行法為何無法規範？
+
+**Step 5｜國內研究現況分析**
+引導學生到台灣期刊論文網、博碩士論文網查詢，了解：
+- 國內已有哪些研究
+- 研究集中在哪些子題（避免擠進主流大洪流）
+- 找出還沒人寫的角度
+
+**Step 6｜找關鍵字**
+協助學生找英文關鍵字，來源：他人論文關鍵字欄位、引註外文文獻、中文主題詞翻譯成英文、詢問AI。
+
+**Step 7｜外文文獻分類**
+引導學生：
+1. 用關鍵字到Westlaw等資料庫撈文獻
+2. 把文獻編號、標題、摘要貼給AI（告訴學生可以直接貼在這個對話框）
+3. AI進行主題分類
+4. 找出外國已是熱門或先驅、但國內研究尚未出現的議題類別
+5. 篩選到30篇以內，進行關聯性分析，縮小到10篇以內
+
+**Step 8｜確認差異化題目**
+協助學生判斷：
+- 自己對這個議題有沒有興趣？
+- 依據自己的專業背景，這個議題有沒有價值與趨勢性？
+- 外國已在討論，國內尚未有人寫？
+- 三個條件符合 → 確認為差異化題目方向
+- 不符合 → 回Step 7換類別，或回Step 6更換關鍵字
+
+## 重要規則
+
+1. **逐步引導**：一次只問一個問題，等學生回答後再進入下一步。
+2. **可跳步**：學生如果說「我要跳到Step X」或「我的題目已確定，從Step 5開始」，應配合調整，從指定步驟繼續。
+3. **每次回覆結尾必須附上進度表**，格式如下（用markdown表格）：
+
+---
+**📊 目前進度**
+
+| 步驟 | 內容 | 狀態 |
+|------|------|------|
+| Step 1 | 找起點 | ✅ 完成 |
+| **Step 2** | **說出初步方向** | **🔄 進行中** |
+| Step 3 | 是介紹還是研究？ | ⬜ 待進行 |
+| Step 4 | 盤點法令狀態 | ⬜ 待進行 |
+| Step 5 | 國內研究現況 | ⬜ 待進行 |
+| Step 6 | 找關鍵字 | ⬜ 待進行 |
+| Step 7 | 外文文獻分類 | ⬜ 待進行 |
+| Step 8 | 確認差異化題目 | ⬜ 待進行 |
+
+4. **如果學生貼上一批文獻標題和摘要**，直接進行Step 7的主題分類，格式參考：
+類別A（AI治理）：1, 7, 12, 55
+類別B（就業）：3, 14, 29
+分類後列出每個類別，讓學生選有興趣的深入。
+
+5. **語氣**：親切、直接，像一位熟悉學生困境的學長姐，不要過度正式。使用繁體中文。
+
+6. **第一句話就要推測**：不要問「你想寫什麼」這種開放式問題。應先根據學生說的內容主動推測方向，再讓學生確認或修正。`;
+
+let history = [];
+let currentStep = 0;
+let stepStatus = {};
+let isLoading = false;
+
+// ── Init ──
+function init() {
+  renderSteps();
+  const key = localStorage.getItem('gemini_key');
+  if (!key) {
+    showKeyModal();
+    disableSend(true);
+  } else {
+    updateKeyStatus(key);
+    disableSend(false);
+  }
+}
+
+function renderSteps() {
+  const list = document.getElementById('stepList');
+  list.innerHTML = STEPS.map(s => {
+    const status = stepStatus[s.id] || 'pending';
+    return `<div class="step-item ${status}" data-step="${s.id}" onclick="jumpToStep(${s.id})">
+      <div class="step-num">${status === 'done' ? '✓' : s.id}</div>
+      <div class="step-label">${s.label}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateStepStatus(activeStep) {
+  currentStep = activeStep;
+  STEPS.forEach(s => {
+    if (s.id < activeStep) stepStatus[s.id] = 'done';
+    else if (s.id === activeStep) stepStatus[s.id] = 'active';
+    else stepStatus[s.id] = 'pending';
+  });
+  renderSteps();
+}
+
+// ── Key management ──
+function showKeyModal() {
+  document.getElementById('keyOverlay').classList.remove('hidden');
+  document.getElementById('keyInput').focus();
+}
+
+function saveKey() {
+  const key = document.getElementById('keyInput').value.trim();
+  const err = document.getElementById('keyErr');
+  if (!key || key.length < 20) {
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  localStorage.setItem('gemini_key', key);
+  document.getElementById('keyOverlay').classList.add('hidden');
+  updateKeyStatus(key);
+  disableSend(false);
+  document.getElementById('keyInput').value = '';
+}
+
+function updateKeyStatus(key) {
+  document.getElementById('keyDot').className = 'key-dot';
+  document.getElementById('keyLabel').textContent = '金鑰已設定（' + key.slice(0,8) + '…）';
+}
+
+function disableSend(v) {
+  document.getElementById('sendBtn').disabled = v;
+}
+
+// Allow Enter in key input
+document.getElementById('keyInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveKey();
+});
+
+// ── Chat ──
+function quickStart(text) {
+  document.getElementById('userInput').value = text;
+  sendMessage();
+}
+
+function jumpToStep(n) {
+  const text = `我要跳到Step ${n}`;
+  document.getElementById('userInput').value = text;
+  sendMessage();
+}
+
+function resetChat() {
+  if (!confirm('確定要重新開始嗎？目前的對話將會清除。')) return;
+  history = [];
+  currentStep = 0;
+  stepStatus = {};
+  renderSteps();
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = `<div class="welcome" id="welcome">
+    <div class="welcome-icon">📚</div>
+    <h2>找到適合你的論文題目</h2>
+    <p>我會一步一步引導你從興趣出發，找到有學術價值、又有差異化的法學論文題目。</p>
+    <div class="quick-starts">
+      <button class="quick-btn" onclick="quickStart('我完全沒有方向，想從頭開始找題目')">我完全沒有方向，想從頭開始</button>
+      <button class="quick-btn" onclick="quickStart('我已經有一個初步方向，想確認能不能寫成論文')">我已經有初步方向，想確認可寫性</button>
+      <button class="quick-btn" onclick="quickStart('我的題目已經確定，想從文獻搜尋開始（Step 5）')">題目已確定，從文獻搜尋開始</button>
+    </div>
+  </div>`;
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('userInput');
+  const text = input.value.trim();
+  if (!text || isLoading) return;
+
+  const key = localStorage.getItem('gemini_key');
+  if (!key) { showKeyModal(); return; }
+
+  // Hide welcome
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+
+  // Add user message
+  input.value = '';
+  input.style.height = 'auto';
+  addMessage('user', text);
+  history.push({ role: 'user', parts: [{ text }] });
+
+  // Loading
+  isLoading = true;
+  disableSend(true);
+  const loadingEl = addLoading();
+
+  try {
+    const res = await callGemini(key, history);
+    loadingEl.remove();
+    addMessage('assistant', res);
+    history.push({ role: 'model', parts: [{ text: res }] });
+    detectStep(res);
+  } catch (e) {
+    loadingEl.remove();
+    addMessage('assistant', '⚠️ 發生錯誤：' + e.message + '\n\n請確認 API 金鑰是否正確，或稍後再試。');
+  }
+
+  isLoading = false;
+  disableSend(false);
+  input.focus();
+}
+
+async function callGemini(key, history) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+  const body = {
+    system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+    contents: history,
+    generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+  };
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error?.message || res.statusText);
+  }
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '（無回應）';
+}
+
+function detectStep(text) {
+  // Try to detect current step from response
+  for (let i = 8; i >= 1; i--) {
+    if (text.includes(`Step ${i}`) || text.includes(`step ${i}`)) {
+      updateStepStatus(i);
+      break;
+    }
+  }
+  // Check if done
+  if (text.includes('差異化題目') && text.includes('✅')) {
+    STEPS.forEach(s => stepStatus[s.id] = 'done');
+    renderSteps();
+  }
+}
+
+function addMessage(role, text) {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const avatar = role === 'assistant' ? '⚖' : '你';
+  div.innerHTML = `<div class="msg-avatar">${avatar}</div><div class="msg-body"><div class="msg-content">${renderMarkdown(text)}</div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function addLoading() {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg assistant';
+  div.innerHTML = `<div class="msg-avatar">⚖</div><div class="msg-body"><div class="msg-content"><div class="loading-dots"><span></span><span></span><span></span></div></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function renderMarkdown(text) {
+  // Tables
+  text = text.replace(/\|(.+)\|/g, (match) => {
+    if (match.includes('---')) return '';
+    const cells = match.split('|').filter(c => c.trim());
+    return '<tr>' + cells.map(c => {
+      const t = c.trim();
+      return `<td>${t}</td>`;
+    }).join('') + '</tr>';
+  });
+  // Wrap table rows
+  text = text.replace(/((<tr>.*<\/tr>\n?)+)/g, (m) => {
+    const rows = m.trim().split('\n').filter(r => r.includes('<tr>'));
+    const header = rows[0].replace(/<td>/g,'<th>').replace(/<\/td>/g,'</th>');
+    const body = rows.slice(1).map((r, i) => {
+      const cls = r.includes('🔄') ? 'row-active' : r.includes('✅') ? 'row-done' : '';
+      return r.replace('<tr>', `<tr class="${cls}">`);
+    }).join('\n');
+    return `<div class="progress-table"><table><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
+  });
+  // Bold
+  text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Italic
+  text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  // HR
+  text = text.replace(/^---$/gm, '<hr>');
+  // Headers
+  text = text.replace(/^### (.+)$/gm, '<h4 style="font-size:13px;color:var(--text-muted);font-weight:500;margin:12px 0 4px">$1</h4>');
+  text = text.replace(/^## (.+)$/gm, '<h3 style="font-size:14px;color:var(--accent);font-weight:500;margin:12px 0 6px">$1</h3>');
+  // Lists
+  text = text.replace(/^[-•] (.+)$/gm, '<li>$1</li>');
+  text = text.replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`);
+  // Paragraphs
+  text = text.split(/\n\n+/).map(p => {
+    p = p.trim();
+    if (!p) return '';
+    if (p.startsWith('<')) return p;
+    return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+  }).join('');
+  return text;
+}
+
+init();
+</script>
+</body>
+</html>
