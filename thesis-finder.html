@@ -615,8 +615,9 @@ function init() {
 function renderSteps() {
   const list = document.getElementById('stepList');
   list.innerHTML = STEPS.map(s => {
-    const status = stepStatus[s.id] || 'pending';
-    return `<div class="step-item ${status}" data-step="${s.id}" onclick="jumpToStep(${s.id})">
+    const status = stepStatus[s.id] || '';
+    const cls = status === 'done' ? 'done' : status === 'active' ? 'active' : '';
+    return `<div class="step-item ${cls}" data-step="${s.id}" onclick="jumpToStep(${s.id})">
       <div class="step-num">${status === 'done' ? '✓' : s.id}</div>
       <div class="step-label">${s.label}</div>
     </div>`;
