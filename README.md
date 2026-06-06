@@ -87,12 +87,13 @@
 
 適合不熟悉 AI 操作的學生，具備視覺化進度條。
 
+🌐 **[直接開啟網頁版](https://mjib007.github.io/legal-thesis-topic/thesis-finder.html)**
+
 **步驟：**
-1. 下載 `web/thesis-finder.html`
-2. 用瀏覽器直接開啟
-3. 第一次使用需輸入 [Gemini API Key](https://aistudio.google.com/app/apikey)（免費申請）
-4. 金鑰儲存在瀏覽器本機，不會上傳至任何伺服器
-5. 後續開啟免重新輸入
+1. 點擊上方連結，或下載 `web/thesis-finder.html` 用瀏覽器開啟
+2. 第一次使用需輸入 [Gemini API Key](https://aistudio.google.com/app/apikey)（免費申請）
+3. 金鑰儲存在瀏覽器本機，不會上傳至任何伺服器
+4. 後續開啟免重新輸入
 
 ---
 
