@@ -772,15 +772,17 @@ async function callGemini(key, history) {
 }
 
 function detectStep(text) {
-  // Try to detect current step from response
-  for (let i = 8; i >= 1; i--) {
-    if (text.includes(`Step ${i}`) || text.includes(`step ${i}`)) {
-      updateStepStatus(i);
-      break;
+  // 只從進度表「進行中」那一行抓當前步驟，避免誤判
+  const lines = text.split('\n');
+  for (const line of lines) {
+    if (line.includes('🔄') || line.includes('進行中')) {
+      const m = line.match(/Step\s*(\d)/);
+      if (m) { updateStepStatus(parseInt(m[1])); return; }
     }
   }
-  // Check if done
-  if (text.includes('差異化題目') && text.includes('✅')) {
+  // 全部完成：Step 8 也是 ✅
+  const allDone = lines.filter(l => l.includes('Step') && l.match(/Step\s*[1-8]/));
+  if (allDone.length >= 8 && !text.includes('⬜') && !text.includes('🔄')) {
     STEPS.forEach(s => stepStatus[s.id] = 'done');
     renderSteps();
   }
