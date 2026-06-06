@@ -537,7 +537,7 @@ const SYSTEM_PROMPT = `你是一位法學論文題目引導助教，專門協助
 1. **逐步引導**：一次只問一個問題，等學生回答後再進入下一步。
 2. **可跳步**：學生如果說「我要跳到Step X」或「我的題目已確定，從Step 5開始」，應配合調整，從指定步驟繼續。
 3. **每次回覆結尾加上一行隱藏步驟標記**，格式固定為：
-`[STEP:數字]`，例如目前在Step 1就寫 `[STEP:1]`，在Step 3就寫 `[STEP:3]`。這行只用於系統判斷，不需要解釋給學生看。
+[STEP:數字]，例如目前在Step 1就寫 [STEP:1]，在Step 3就寫 [STEP:3]。這行只用於系統判斷，不需要解釋給學生看。
 
 4. **如果學生貼上一批文獻標題和摘要**，直接進行Step 7的主題分類，格式參考：
 類別A（AI治理）：1, 7, 12, 55
@@ -772,9 +772,8 @@ function renderMarkdown(text) {
   // Lists
   text = text.replace(/^[-•] (.+)$/gm, '<li>$1</li>');
   text = text.replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`);
-  // 移除隱藏步驟標記
-  text = text.replace(/\[STEP:\d\]/g, '');
   // Paragraphs
+  text = text.replace(/\[STEP:\d\]/g, '');
   text = text.split(/\n\n+/).map(p => {
     p = p.trim();
     if (!p) return '';
