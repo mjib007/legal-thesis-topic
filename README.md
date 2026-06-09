@@ -32,7 +32,7 @@
 
 | 檔案 | 說明 | 適用平台 |
 |------|------|----------|
-| `skill/SKILL_legal_thesis_topic.md` | Claude 專案 SKILL 版 | Claude.ai 專案功能 |
+| `skill/SKILL_legal_thesis_topic.md` | Claude 專案 SKILL 版 | Claude.ai Skills功能，也可以用在專案中 |
 | `prompt/legal_thesis_topic_prompt.md` | 通用 Prompt 版 | ChatGPT、Gemini、Claude 等所有 AI 對話介面 |
 | `web/thesis-finder.html` | 網頁互動版 | 瀏覽器（需 Gemini API Key） |
 | `README.md` | 本說明文件 | — |
